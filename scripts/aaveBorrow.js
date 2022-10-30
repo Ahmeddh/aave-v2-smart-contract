@@ -19,7 +19,7 @@ async function main() {
     const daiAddress = networkConfig[chainId]["daiToken"]
     const wethAddress = networkConfig[chainId]["wethToken"]
 
-    //get lending pool address ; lendingPoolAddressesProvider
+    //Get lending Pool address and initilize contract
     const lendingPoolAddress = await getLendingPoolAddress(deployer)
     const lendingPoolContract = await ethers.getContractAt(
         "ILendingPool",
@@ -48,9 +48,8 @@ async function main() {
     await getBorrowData(lendingPoolContract, deployer)
 }
 
+//Get user loan data
 const getBorrowData = async (lendingPoolContract, deployer) => {
-    //getUserAccountData
-    //totalCollateralETH,totalDebtETH,availableBorrowsETH
     const { totalCollateralETH, totalDebtETH, availableBorrowsETH } =
         await lendingPoolContract.getUserAccountData(deployer)
     console.log(`You have ${totalCollateralETH} in ETH as collateral`)
@@ -58,6 +57,7 @@ const getBorrowData = async (lendingPoolContract, deployer) => {
     console.log(`You have ${availableBorrowsETH} ETH you can borrow`)
     return { availableBorrowsETH, totalDebtETH }
 }
+
 const getLendingPoolAddress = async (deployer) => {
     const lendingPoolProvider = await ethers.getContractAt(
         "ILendingPoolAddressesProvider",
@@ -80,11 +80,8 @@ const getEthDaiPrice = async () => {
 }
 
 const borrowDAI = async (daiAddress, lendingPoolContract, amount, deployer) => {
-    /**
-     * function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf)
-     */
     const tx = await lendingPoolContract.borrow(daiAddress, amount, 1, 0, deployer)
-    const txResponse = await tx.wait(1)
+    await tx.wait(1)
     console.log("Borrowed successfully")
 }
 
@@ -95,7 +92,7 @@ const depositWETH = async (deployer, lendingPoolContract, amount) => {
         deployer,
         0
     )
-    const txResponse = await tx.wait(1)
+    await tx.wait(1)
     console.log("Deposited succesfully")
 }
 
@@ -106,7 +103,6 @@ const approveERC20 = async (erc20Address, deployer, spender, amount) => {
     console.log(`Deposit of ${amount} approved`)
 }
 
-//function repay(address asset, uint256 amount, uint256 rateMode, address onBehalfOf)
 const payback = async (daiAddress, amount, lendingPoolContract, deployer) => {
     await approveERC20(daiAddress, deployer, lendingPoolContract.address, amount)
     const tx = await lendingPoolContract.repay(daiAddress, amount, 1, deployer)
