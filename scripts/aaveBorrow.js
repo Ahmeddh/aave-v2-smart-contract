@@ -32,12 +32,12 @@ async function main() {
     //Deposit
     await depositWETH(deployer, lendingPoolContract, AMOUNT)
 
-    //Get DAI/ETH price
-    const daiEthPrice = await getDaiEthPrice()
+    //Get ETH/DAI price
+    const ethDaiPrice = await getEthDaiPrice()
 
     //Get available amount to borrow
     let { availableBorrowsETH, totalDebtETH } = await getBorrowData(lendingPoolContract, deployer)
-    const daiToBorrow = availableBorrowsETH.toString() * 0.95 * (1 / daiEthPrice.toNumber())
+    const daiToBorrow = availableBorrowsETH.toString() * 0.95 * ethDaiPrice
     const daiToBorrowInWei = ethers.utils.parseEther(daiToBorrow.toString())
     //Borrow
     await borrowDAI(daiAddress, lendingPoolContract, daiToBorrowInWei, deployer)
@@ -65,7 +65,7 @@ const getLendingPoolAddress = async (deployer) => {
     return lendingPoolAddress
 }
 
-const getDaiEthPrice = async () => {
+const getEthDaiPrice = async () => {
     const aggregatorV3Address = networkConfig[chainId]["daiEthPriceFeed"]
     const aggregatorV3Contract = await ethers.getContractAt(
         "AggregatorV3Interface",
@@ -73,7 +73,7 @@ const getDaiEthPrice = async () => {
     )
     const daiEthPrice = (await aggregatorV3Contract.latestRoundData())[1]
     console.log(`DAI/ETH price is ${daiEthPrice.toString()}`)
-    return daiEthPrice
+    return 1 / daiEthPrice.toNumber()
 }
 
 const borrowDAI = async (daiAddress, lendingPoolContract, amount, deployer) => {
