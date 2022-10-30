@@ -1,48 +1,7 @@
-<br/>
-<p align="center">
-<a href="https://chain.link" target="_blank">
-<img src="./box-img-lg.png" width="225" alt="Chainlink Hardhat logo">
-</a>
-</p>
-<br/>
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/smartcontractkit/hardhat-starter-kit)
-
-- [Chainlink Hardhat Starter Kit](#chainlink-hardhat-starter-kit)
-- [Getting Started](#getting-started)
-  - [Requirements](#requirements)
-  - [Quickstart](#quickstart)
-    - [Typescript](#typescript)
-- [Usage](#usage)
-  - [Deploying Contracts](#deploying-contracts)
-  - [Run a Local Network](#run-a-local-network)
-  - [Using a Testnet or Live Network (like Mainnet or Polygon)](#using-a-testnet-or-live-network-like-mainnet-or-polygon)
-    - [Goerli Ethereum Testnet Setup](#goerli-ethereum-testnet-setup)
-  - [Forking](#forking)
-  - [Auto-Funding](#auto-funding)
-- [Test](#test)
-- [Interacting with Deployed Contracts](#interacting-with-deployed-contracts)
-  - [Chainlink Price Feeds](#chainlink-price-feeds)
-  - [Request & Receive Data](#request--receive-data)
-  - [VRF Get a random number](#vrf-get-a-random-number)
-  - [Keepers](#keepers)
-  - [Verify on Etherscan](#verify-on-etherscan)
-- [View Contracts Size](#view-contracts-size)
-- [Linting](#linting)
-- [Code Formatting](#code-formatting)
-- [Estimating Gas](#estimating-gas)
-- [Code Coverage](#code-coverage)
-- [Fuzzing](#fuzzing)
-- [Contributing](#contributing)
-- [Thank You!](#thank-you)
-  - [Resources](#resources)
-
-# Chainlink Hardhat Starter Kit
- Implementation of the following 4 Chainlink features using the [Hardhat](https://hardhat.org/) development environment:
- - [Chainlink Price Feeds](https://docs.chain.link/docs/using-chainlink-reference-contracts)
- - [Chainlink VRF](https://docs.chain.link/docs/chainlink-vrf)
- - [Chainlink Keepers](https://docs.chain.link/docs/chainlink-keepers/introduction/)
- - [Request & Receive data](https://docs.chain.link/docs/request-and-receive-data)
+# What to implement
+1. Deposit collateral (ETH/WETH)
+2. Borrow another asset (DAI)
+3. Repay the DAI
 
 # Getting Started 
 
