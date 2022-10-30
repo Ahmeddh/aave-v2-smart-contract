@@ -150,15 +150,7 @@ export PRIVATE_KEY='abcdef'
 
 For other networks like mainnet and polygon, you can use different environment variables for your RPC URL and your private key. See the `hardhat.config.js` to learn more. 
 
-3. Get some Goerli Testnet ETH and LINK 
-
-Head over to the [Chainlink faucets](https://faucets.chain.link/) and get some ETH and LINK. Please follow [the chainlink documentation](https://docs.chain.link/docs/acquire-link/) if unfamiliar. 
-
-4. Create VRF V2 subscription
-
-Head over to [VRF Subscription Page](https://vrf.chain.link/goerli) and create the new subscription. Save your subscription ID and put it in `helper-hardhat-config.js` file as `subscriptionId`
-
-5. Running commands
+3. Running commands
 
 You should now be all setup! You can run any command and just pass the `--network goerli` now!
 
@@ -248,60 +240,6 @@ npm run test --parallel
 After deploying your contracts, the deployment output will give you the contract addresses as they are deployed. You can then use these contract addresses in conjunction with Hardhat tasks to perform operations on each contract.
 
 
-## Chainlink Price Feeds
-The Price Feeds consumer contract has one task, to read the latest price of a specified price feed contract
-
-```bash
-npx hardhat read-price-feed --contract insert-contract-address-here --network network
-```
-
-## Request & Receive Data
-The APIConsumer contract has two tasks, one to request external data based on a set of parameters, and one to check to see what the result of the data request is. This contract needs to be funded with link first:
-
-```bash
-npx hardhat fund-link --contract insert-contract-address-here --network network
-```
-
-Once it's funded, you can request external data by passing in a number of parameters to the request-data task. The contract parameter is mandatory, the rest are optional
-
-```bash
-npx hardhat request-data --contract insert-contract-address-here --network network
-```
-
-Once you have successfully made a request for external data, you can see the result via the read-data task
-```bash
-npx hardhat read-data --contract insert-contract-address-here --network network
-```
-
-
-## VRF Get a random number
-The VRFConsumer contract has two tasks, one to request a random number, and one to read the result of the random number request. To start, go to [VRF Subscription Page](https://vrf.chain.link/goerli) and create the new subscription. Save your subscription ID and put it in `helper-hardhat-config.js` file as `subscriptionId`:
-
-```javascript
-5: {
-    // rest of the config
-    subscriptionId = "777"
-}
-```
-
-Then, deploy your VRF V2 contract consumer to the network of your recent subscription using subscription id as constructor argument.
-
-```bash
-npm run deploy --network network   
-```
-
-Finally, you need to go to your subscription page one more time and add the address of deployed contract as a new consumer. Once that's done, you can perform a VRF request with the request-random-number task:
-
-```bash
-npx hardhat request-random-number --contract insert-contract-address-here --network network
-```
-
-Once you have successfully made a request for a random number, you can see the result via the read-random-number task:
-
-```bash
-npx hardhat read-random-number --contract insert-contract-address-here --network network
-```
-
 ## Automation
 The AutomationCounter contract is a simple Chainlink Automation enabled contract that simply maintains a counter variable that gets incremented each time the performUpkeep task is performed by a Chainlink Automation. Once the contract is deployed, you should head to [https://automation.chain.link/](https://automation.chain.link/) to register it for upkeeps, then you can use the task below to view the counter variable that gets incremented by Chainlink Automation
 
@@ -356,7 +294,7 @@ To see a measure in percent of the degree to which the smart contract source cod
 npm run coverage
 ```
 
-# Fuzzing
+
 
 We are going to use Echidna as a Fuzz testing tool. You need to have [Docker](https://www.docker.com/) installed with at least 8GB virtual memory allocated (To update this parameter go to _Settings->Resources->Advanced->Memory_). 
 
