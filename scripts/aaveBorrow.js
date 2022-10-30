@@ -16,8 +16,8 @@ const lendingPoolAddressesProvider = networkConfig[chainId]["lendingPoolAddresse
 async function main() {
     await getWeth()
     const { deployer } = await getNamedAccounts()
-    const wethToken = networkConfig[chainId]["wethToken"]
     const daiAddress = networkConfig[chainId]["daiToken"]
+    const wethAddress = networkConfig[chainId]["wethToken"]
 
     //get lending pool address ; lendingPoolAddressesProvider
     const lendingPoolAddress = await getLendingPoolAddress(deployer)
@@ -27,7 +27,7 @@ async function main() {
         deployer
     )
     //Approve lending pool to spend WETH
-    await approveERC20(deployer, lendingPoolContract, AMOUNT)
+    await approveERC20(wethAddress, deployer, lendingPoolContract.address, AMOUNT)
 
     //Deposit
     await depositWETH(deployer, lendingPoolContract, AMOUNT)
@@ -41,8 +41,11 @@ async function main() {
     const daiToBorrowInWei = ethers.utils.parseEther(daiToBorrow.toString())
     //Borrow
     await borrowDAI(daiAddress, lendingPoolContract, daiToBorrowInWei, deployer)
-    await getBorrowData(lendingPoolContract, deployer)
+    totalDebtETH = (await getBorrowData(lendingPoolContract, deployer)).totalDebtETH
+
     //Payback
+    await payback(daiAddress, totalDebtETH, lendingPoolContract, deployer)
+    await getBorrowData(lendingPoolContract, deployer)
 }
 
 const getBorrowData = async (lendingPoolContract, deployer) => {
@@ -96,15 +99,19 @@ const depositWETH = async (deployer, lendingPoolContract, amount) => {
     console.log("Deposited succesfully")
 }
 
-const approveERC20 = async (deployer, lendingPoolContract, AMOUNT) => {
-    const iWeth = await ethers.getContractAt(
-        "IWeth",
-        networkConfig[network.config.chainId].wethToken,
-        deployer
-    )
-    const tx = await iWeth.approve(lendingPoolContract.address, AMOUNT)
-    const txResponse = await tx.wait(1)
-    console.log(`Deposit of ${AMOUNT} approved`)
+const approveERC20 = async (erc20Address, deployer, spender, amount) => {
+    const erc20Token = await ethers.getContractAt("IERC20", erc20Address, deployer)
+    const tx = await erc20Token.approve(spender, amount)
+    await tx.wait(1)
+    console.log(`Deposit of ${amount} approved`)
+}
+
+//function repay(address asset, uint256 amount, uint256 rateMode, address onBehalfOf)
+const payback = async (daiAddress, amount, lendingPoolContract, deployer) => {
+    await approveERC20(daiAddress, deployer, lendingPoolContract.address, amount)
+    const tx = await lendingPoolContract.repay(daiAddress, amount, 1, deployer)
+    await tx.wait(1)
+    console.log("Paid back the loan successfully")
 }
 
 main()
