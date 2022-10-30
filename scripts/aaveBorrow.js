@@ -16,6 +16,9 @@ const lendingPoolAddressesProvider = networkConfig[chainId]["lendingPoolAddresse
 async function main() {
     await getWeth()
     const { deployer } = await getNamedAccounts()
+    const wethToken = networkConfig[chainId]["wethToken"]
+    const daiAddress = networkConfig[chainId]["daiToken"]
+
     //get lending pool address ; lendingPoolAddressesProvider
     const lendingPoolAddress = await getLendingPoolAddress(deployer)
     const lendingPoolContract = await ethers.getContractAt(
@@ -28,8 +31,30 @@ async function main() {
 
     //Deposit
     await depositWETH(deployer, lendingPoolContract, AMOUNT)
+
+    //Get DAI/ETH price
+    const daiEthPrice = await getDaiEthPrice()
+
+    //Get available amount to borrow
+    let { availableBorrowsETH, totalDebtETH } = await getBorrowData(lendingPoolContract, deployer)
+    const daiToBorrow = availableBorrowsETH.toString() * 0.95 * (1 / daiEthPrice.toNumber())
+    const daiToBorrowInWei = ethers.utils.parseEther(daiToBorrow.toString())
+    //Borrow
+    await borrowDAI(daiAddress, lendingPoolContract, daiToBorrowInWei, deployer)
+    await getBorrowData(lendingPoolContract, deployer)
+    //Payback
 }
 
+const getBorrowData = async (lendingPoolContract, deployer) => {
+    //getUserAccountData
+    //totalCollateralETH,totalDebtETH,availableBorrowsETH
+    const { totalCollateralETH, totalDebtETH, availableBorrowsETH } =
+        await lendingPoolContract.getUserAccountData(deployer)
+    console.log(`You have ${totalCollateralETH} in ETH as collateral`)
+    console.log(`You have ${totalDebtETH} ETH as Debt`)
+    console.log(`You have ${availableBorrowsETH} ETH you can borrow`)
+    return { availableBorrowsETH, totalDebtETH }
+}
 const getLendingPoolAddress = async (deployer) => {
     const lendingPoolProvider = await ethers.getContractAt(
         "ILendingPoolAddressesProvider",
@@ -40,17 +65,30 @@ const getLendingPoolAddress = async (deployer) => {
     return lendingPoolAddress
 }
 
-const borrowDAI = async (lendingPoolContract) => {
+const getDaiEthPrice = async () => {
+    const aggregatorV3Address = networkConfig[chainId]["daiEthPriceFeed"]
+    const aggregatorV3Contract = await ethers.getContractAt(
+        "AggregatorV3Interface",
+        aggregatorV3Address
+    )
+    const daiEthPrice = (await aggregatorV3Contract.latestRoundData())[1]
+    console.log(`DAI/ETH price is ${daiEthPrice.toString()}`)
+    return daiEthPrice
+}
+
+const borrowDAI = async (daiAddress, lendingPoolContract, amount, deployer) => {
     /**
      * function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf)
      */
-    // const tx = await lendingPoolContract.Borrow()
+    const tx = await lendingPoolContract.borrow(daiAddress, amount, 1, 0, deployer)
+    const txResponse = await tx.wait(1)
+    console.log("Borrowed successfully")
 }
 
-const depositWETH = async (deployer, lendingPoolContract, AMOUNT) => {
+const depositWETH = async (deployer, lendingPoolContract, amount) => {
     const tx = await lendingPoolContract.deposit(
         networkConfig[network.config.chainId].wethToken,
-        AMOUNT,
+        amount,
         deployer,
         0
     )
